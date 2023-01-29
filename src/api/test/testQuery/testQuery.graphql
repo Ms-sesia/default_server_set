@@ -1,0 +1,8 @@
+type Query {
+  testQuery(term: String): testQueryInfo
+}
+
+type testQueryInfo {
+  result: Boolean
+  term: String
+}
