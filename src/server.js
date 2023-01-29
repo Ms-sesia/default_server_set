@@ -1,15 +1,12 @@
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
-import expressPlayground from "graphql-playground-middleware-express";
 import express from "express";
 import http from "http";
 import cors from "cors";
 import { json } from "body-parser";
 
 import schema from "./schema";
-import helmet from "helmet";
-import csp from "helmet-csp";
 import graphqlUploadExpress from "./libs/graphql_fileUpload/graphqlUploadExpress";
 // import { upload, uploadController, uploadSet } from "./libs/fileUpload/upload";
 import dotenv from "dotenv";
@@ -17,10 +14,14 @@ dotenv.config();
 import path from "path";
 import { isAuthenticated } from "./middleWare";
 
+/* playground modules */
+// import expressPlayground from "graphql-playground-middleware-express";
+// import helmet from "helmet";
+// import csp from "helmet-csp";
+
 /* subscription libs */
 import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/lib/use/ws";
-// import { PubSub } from "graphql-subscriptions";
 
 const PORT = process.env.SERVER_PORT;
 
