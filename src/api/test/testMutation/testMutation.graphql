@@ -1,0 +1,8 @@
+type Mutation {
+  testMutation(term: String): testMutationInfo
+}
+
+type testMutationInfo {
+  result: Boolean
+  term: String
+}

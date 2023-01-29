@@ -37,7 +37,9 @@
     "fs-capacitor": "^6.2.0",
     "graphql": "^16.6.0",
     "graphql-playground-middleware-express": "^1.7.23",
+    "graphql-subscriptions": "^2.0.0",
     "graphql-upload": "^16.0.2",
+    "graphql-ws": "^5.11.2",
     "helmet": "^6.0.0",
     "helmet-csp": "^3.4.0",
     "http-errors": "^2.0.0",
@@ -46,6 +48,7 @@
     "nodemon": "^2.0.20",
     "object-path": "^0.11.8",
     "path": "^0.12.7",
-    "pug": "^3.0.2"
+    "pug": "^3.0.2",
+    "ws": "^8.12.0"
   }
 }

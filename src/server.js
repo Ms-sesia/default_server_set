@@ -17,6 +17,11 @@ dotenv.config();
 import path from "path";
 import { isAuthenticated } from "./middleWare";
 
+/* subscription libs */
+import { WebSocketServer } from "ws";
+import { useServer } from "graphql-ws/lib/use/ws";
+// import { PubSub } from "graphql-subscriptions";
+
 const PORT = process.env.SERVER_PORT;
 
 (async () => {
@@ -24,9 +29,29 @@ const PORT = process.env.SERVER_PORT;
 
   const httpServer = http.createServer(app);
 
+  const wsServer = new WebSocketServer({
+    server: httpServer,
+    path: "/graphql",
+  });
+
+  const serverCleanup = useServer({ schema }, wsServer);
+
+  // const pubsub = new PubSub();
+
   const server = new ApolloServer({
     schema,
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+    plugins: [
+      ApolloServerPluginDrainHttpServer({ httpServer }),
+      {
+        async serverWillStart() {
+          return {
+            async drainServer() {
+              await serverCleanup.dispose();
+            },
+          };
+        },
+      },
+    ],
   });
 
   await server.start();
@@ -36,6 +61,7 @@ const PORT = process.env.SERVER_PORT;
     cors(),
     json(),
     expressMiddleware(server, {
+      // context: async ({ request }) => ({ request, isAuthenticated, pubsub }),
       context: async ({ request }) => ({ request, isAuthenticated }),
     })
   );
@@ -44,22 +70,22 @@ const PORT = process.env.SERVER_PORT;
 
   app.use(graphqlUploadExpress());
 
-  app.get("/", expressPlayground({ endpoint: "/graphql" }));
+  // app.get("/", expressPlayground({ endpoint: "/graphql" }));
 
-  app.use(helmet());
-  app.use(
-    csp({
-      useDefaults: true,
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        styleSrcElem: ["'self'", "fonts.googleapis.com", "cdn.jsdelivr.net", "'unsafe-inline'"],
-        imgSrc: ["'self'", "cdn.jsdelivr.net"],
-        scriptSrcElem: ["'self'", "cdn.jsdelivr.net", "'unsafe-inline'"],
-        fontSrc: ["'self'", "'unsafe-inline'", "fonts.gstatic.com"],
-      },
-    })
-  );
+  // app.use(helmet());
+  // app.use(
+  //   csp({
+  //     useDefaults: true,
+  //     directives: {
+  //       defaultSrc: ["'self'"],
+  //       styleSrc: ["'self'", "'unsafe-inline'"],
+  //       styleSrcElem: ["'self'", "fonts.googleapis.com", "cdn.jsdelivr.net", "'unsafe-inline'"],
+  //       imgSrc: ["'self'", "cdn.jsdelivr.net"],
+  //       scriptSrcElem: ["'self'", "cdn.jsdelivr.net", "'unsafe-inline'"],
+  //       fontSrc: ["'self'", "'unsafe-inline'", "fonts.gstatic.com"],
+  //     },
+  //   })
+  // );
 
   await new Promise((resolve) => httpServer.listen({ port: PORT }, resolve));
   console.log(`Server ready at http://localhost:${PORT}`);
