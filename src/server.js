@@ -12,7 +12,7 @@ import graphqlUploadExpress from "./libs/graphql_fileUpload/graphqlUploadExpress
 import dotenv from "dotenv";
 dotenv.config();
 import path from "path";
-import { isAuthenticated } from "./middleWare";
+import { isAuthenticated, tokenParse } from "./middleWare";
 
 /* playground modules */
 // import expressPlayground from "graphql-playground-middleware-express";
@@ -61,6 +61,7 @@ const PORT = process.env.SERVER_PORT;
     "/graphql",
     cors(),
     json(),
+    (req, res, next) => tokenParse(req, res, next),
     expressMiddleware(server, {
       // context: async ({ request }) => ({ request, isAuthenticated, pubsub }),
       context: async ({ request }) => ({ request, isAuthenticated }),
