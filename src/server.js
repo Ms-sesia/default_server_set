@@ -37,8 +37,6 @@ const PORT = process.env.SERVER_PORT;
 
   const serverCleanup = useServer({ schema }, wsServer);
 
-  // const pubsub = new PubSub();
-
   const server = new ApolloServer({
     schema,
     plugins: [
