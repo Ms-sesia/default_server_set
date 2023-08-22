@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "RiskCatch_api",
+      name: "default_server",
       script: "./src/server-register.js",
       instances: 2,
       exec_mode: "cluster",

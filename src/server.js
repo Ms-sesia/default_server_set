@@ -1,27 +1,25 @@
+import "./config";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import express from "express";
 import http from "http";
 import cors from "cors";
+import helmet from "helmet";
 import { json } from "body-parser";
-
 import schema from "./schema";
 import graphqlUploadExpress from "./libs/graphql_fileUpload/graphqlUploadExpress";
 // import { upload, uploadController, uploadSet } from "./libs/fileUpload/upload";
 import dotenv from "dotenv";
 dotenv.config();
 import path from "path";
-import { isAuthenticated, tokenParse } from "./middleWare";
-
-/* playground modules */
-// import expressPlayground from "graphql-playground-middleware-express";
-// import helmet from "helmet";
-// import csp from "helmet-csp";
+import { isAuthenticated } from "./middleWare";
 
 /* subscription libs */
 import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/lib/use/ws";
+import { authenticateJwt } from "./passport";
+import webSocket from "./libs/webSocket/webSocket";
 
 const PORT = process.env.SERVER_PORT;
 
@@ -54,38 +52,29 @@ const PORT = process.env.SERVER_PORT;
   });
 
   await server.start();
+  
+  app.get("/", (req, res, next) => {
+    // res.render("Hello world!");
+    res.json({
+      success: true,
+    });
+    next();
+  });
+  // app.use(authenticateJwt); // 유저 토큰 인증 - 프로젝트 진행시 사용
+
+  // 이미지 혹은 파일들 경로 접속 허용
+  app.use(express.static(path.join(__dirname, "../", "Images")));
+  app.use(graphqlUploadExpress()); // graphql 파일업로드
 
   app.use(
     "/graphql",
-    cors(),
+    // cors(),
+    // helmet({ contentSecurityPolicy: false }),
     json(),
-    (req, res, next) => tokenParse(req, res, next),
-    expressMiddleware(server, {
-      // context: async ({ request }) => ({ request, isAuthenticated, pubsub }),
-      context: async ({ request }) => ({ request, isAuthenticated }),
-    })
+    expressMiddleware(server, { context: async ({ req }) => ({ request: req, isAuthenticated }) })
   );
 
-  app.use(express.static(path.join(__dirname, "../", "Images")));
-
-  app.use(graphqlUploadExpress());
-
-  // app.get("/", expressPlayground({ endpoint: "/graphql" }));
-
-  // app.use(helmet());
-  // app.use(
-  //   csp({
-  //     useDefaults: true,
-  //     directives: {
-  //       defaultSrc: ["'self'"],
-  //       styleSrc: ["'self'", "'unsafe-inline'"],
-  //       styleSrcElem: ["'self'", "fonts.googleapis.com", "cdn.jsdelivr.net", "'unsafe-inline'"],
-  //       imgSrc: ["'self'", "cdn.jsdelivr.net"],
-  //       scriptSrcElem: ["'self'", "cdn.jsdelivr.net", "'unsafe-inline'"],
-  //       fontSrc: ["'self'", "'unsafe-inline'", "fonts.gstatic.com"],
-  //     },
-  //   })
-  // );
+  webSocket(httpServer);
 
   await new Promise((resolve) => httpServer.listen({ port: PORT }, resolve));
   console.log(`Server ready at http://localhost:${PORT}`);
