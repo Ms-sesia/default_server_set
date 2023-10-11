@@ -1,0 +1,15 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 무신사 임직원(피플 및 외부 임직원 포함 전체)
+model user {
+  user_id          Int    @id @default(autoincrement())
+  user_name        Bytes? @db.VarBinary(250) // 임직원 이름 10자
+  user_phoneNumber Bytes? @db.VarBinary(250) // 핸드폰 번호
+}

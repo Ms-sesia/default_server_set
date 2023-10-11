@@ -1,0 +1,4 @@
+type Mutation {
+  testCreate(userName: String, userPhoneNumber: String): Boolean
+  testSearch(term: String): Boolean
+}
